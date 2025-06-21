@@ -1,0 +1,20 @@
+name: Playlist Updater
+on:
+  repository_dispatch:
+    types: [update_trigger]
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Desativar User Agent Padrão
+        run: |
+          git config --global user.email "actions@noreply.github.com"
+          git config --global user.name "IPTV Updater"
+          echo "USER_AGENT='Custom-Agent/1.0 (Non-GitHub-Bot)'" >> $GITHUB_ENV
+
+      - name: Executar Atualização
+        env:
+          CRONJOB_WEBHOOK: ${{ secrets.CRONJOB_WEBHOOK }}
+        run: |
+          python scripts/stream_fetcher.py --user-agent "$USER_AGENT"
