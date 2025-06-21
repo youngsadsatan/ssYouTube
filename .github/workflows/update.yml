@@ -21,10 +21,14 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install Dependencies
+      - name: Install System Dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y python3-dev libxml2-dev libxslt-dev ffmpeg
+          sudo apt-get install -y build-essential libssl-dev libffi-dev
+
+      - name: Install Python Dependencies
+        run: |
           pip install --upgrade pip
           pip install yt-dlp==2025.06.09 requests beautifulsoup4 Pillow
 
@@ -40,7 +44,7 @@ jobs:
           [ -d playlists ] && cp -r playlists/* public/playlists/ || echo "No playlists"
           [ -d icons ] && cp -r icons/* public/icons/ || echo "No icons"
           
-          # Converte quebras de linha para CRLF
+          # Garante formato CRLF
           if [ -d public/playlists ]; then
             find public/playlists -name '*.m3u' -exec sed -i 's/$/\r/' {} \;
           fi
