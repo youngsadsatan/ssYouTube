@@ -1,11 +1,16 @@
 name: Playlist Updater
 on:
-  workflow_dispatch:  # Permite acionamento manual
-  repository_dispatch: # Para acionamento via webhook externo
+  workflow_dispatch:
+  repository_dispatch:
     types: [run_update]
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 jobs:
-  update:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -20,18 +25,32 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pip install streamlink requests pillow beautifulsoup4
-          
-      - name: Run Updater Script
+          pip install streamlink==6.5.1 requests beautifulsoup4 Pillow
+
+      - name: Run Stream Fetcher
         run: python scripts/stream_fetcher.py
         env:
-          USER_AGENT: "IPTV-Updater/1.0 (GitHub Actions)"
-          
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+          USER_AGENT: "Manual-Updater/1.0"
+
+      - name: Prepare Playlists Directory
+        run: |
+          mkdir -p public/playlists
+          mkdir -p public/icons
+          cp -r playlists/* public/playlists/
+          cp -r icons/* public/icons/
+
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./playlists
-          keep_files: true
-          user_name: 'IPTV Updater'
-          user_email: 'iptv-updater@noreply.github.com'
+          path: public
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
