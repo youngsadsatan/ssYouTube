@@ -37,14 +37,20 @@ jobs:
         env:
           USER_AGENT: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
 
-      - name: Prepare Playlists Directory
+      - name: Prepare Artifacts
         run: |
           mkdir -p public/playlists
           mkdir -p public/icons
+          mkdir -p public/logs
+          
+          # Copiar playlists e ícones
           [ -d playlists ] && cp -r playlists/* public/playlists/ || echo "No playlists"
           [ -d icons ] && cp -r icons/* public/icons/ || echo "No icons"
           
-          # Garante formato CRLF
+          # Copiar logs
+          cp logs/* public/logs/ || echo "No log files"
+          
+          # Converter quebras de linha para CRLF nas playlists
           if [ -d public/playlists ]; then
             find public/playlists -name '*.m3u' -exec sed -i 's/$/\r/' {} \;
           fi
