@@ -7,6 +7,8 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 from PIL import Image
 from urllib.parse import urlparse
+import json
+import time
 
 # Configurações globais
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
@@ -27,7 +29,7 @@ CHANNELS = {
         "@AssociatedPress",
         "@CNNbrasil",
         "@CRUXnews",
-        "@France24_en",
+        "@France24",  # Corrigido: removido _en que tinha DRM
         "@LiveNowFox",
         "@Reuters",
         "@SkyNews",
@@ -89,7 +91,6 @@ def get_live_url(channel_url):
         # Tenta 3: JSON-LD
         script = soup.find('script', type='application/ld+json')
         if script:
-            import json
             try:
                 data = json.loads(script.string)
                 if isinstance(data, list):
@@ -104,33 +105,32 @@ def get_live_url(channel_url):
         print(f"[ERRO] Falha ao obter live de {channel_url}: {str(e)}")
         return None
 
-def fetch_stream(youtube_url):
-    """Obtém URL de stream usando Streamlink (apenas a melhor qualidade)"""
+def fetch_stream_with_ytdlp(youtube_url):
+    """Obtém URL de stream usando yt-dlp (formato m3u8)"""
     try:
         command = [
-            "streamlink",
-            "--stream-url",
-            "--quiet",
-            "--http-header",
-            f"User-Agent={USER_AGENT}",
-            youtube_url,
-            "best"
+            "yt-dlp",
+            "-g",
+            "--format", "best",
+            "--no-check-certificates",
+            youtube_url
         ]
         
         result = subprocess.run(
             command,
             capture_output=True,
             text=True,
-            timeout=45
+            timeout=60
         )
         
         if result.returncode == 0:
+            # yt-dlp retorna a URL direta do stream
             return result.stdout.strip()
         else:
-            print(f"[ERRO] Streamlink retornou erro: {result.stderr}")
+            print(f"[ERRO] yt-dlp retornou erro: {result.stderr}")
             return None
     except Exception as e:
-        print(f"[ERRO] Streamlink falhou para {youtube_url}: {str(e)}")
+        print(f"[ERRO] yt-dlp falhou para {youtube_url}: {str(e)}")
         return None
 
 def download_icon(channel_id):
@@ -212,8 +212,8 @@ def generate_playlists():
             
             print(f"   Live encontrada: {live_url}")
             
-            # Obtém stream URL
-            stream_url = fetch_stream(live_url)
+            # Obtém stream URL com yt-dlp
+            stream_url = fetch_stream_with_ytdlp(live_url)
             if not stream_url:
                 print(f"   [AVISO] Nenhum stream encontrado para {channel}")
                 continue
