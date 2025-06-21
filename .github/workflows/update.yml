@@ -15,8 +15,6 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -25,19 +23,22 @@ jobs:
 
       - name: Install Dependencies
         run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-dev
           pip install streamlink==6.5.1 requests beautifulsoup4 Pillow
 
       - name: Run Stream Fetcher
         run: python scripts/stream_fetcher.py
         env:
-          USER_AGENT: "Manual-Updater/1.0"
+          USER_AGENT: "SSYouTube-Updater/1.0"
 
       - name: Prepare Playlists Directory
         run: |
+          mkdir -p public
           mkdir -p public/playlists
           mkdir -p public/icons
-          cp -r playlists/* public/playlists/
-          cp -r icons/* public/icons/
+          [ -d playlists ] && cp -r playlists/* public/playlists/ || echo "No playlists"
+          [ -d icons ] && cp -r icons/* public/icons/ || echo "No icons"
 
       - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@v3
