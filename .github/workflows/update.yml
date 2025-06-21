@@ -21,39 +21,20 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install System Dependencies
+      - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y python3-dev libxml2-dev libxslt-dev ffmpeg
-          sudo apt-get install -y build-essential libssl-dev libffi-dev
+          sudo apt-get install -y python3-dev ffmpeg
+          pip install yt-dlp==2025.06.09 requests
 
-      - name: Install Python Dependencies
-        run: |
-          pip install --upgrade pip
-          pip install yt-dlp==2025.06.09 requests beautifulsoup4 Pillow
-
-      - name: Run Stream Fetcher
+      - name: Run Direct Stream Fetcher
         run: python scripts/stream_fetcher.py
-        env:
-          USER_AGENT: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
 
       - name: Prepare Artifacts
         run: |
           mkdir -p public/playlists
-          mkdir -p public/icons
-          mkdir -p public/logs
-          
-          # Copiar playlists e ícones
-          [ -d playlists ] && cp -r playlists/* public/playlists/ || echo "No playlists"
-          [ -d icons ] && cp -r icons/* public/icons/ || echo "No icons"
-          
-          # Copiar logs
-          cp logs/* public/logs/ || echo "No log files"
-          
-          # Converter quebras de linha para CRLF nas playlists
-          if [ -d public/playlists ]; then
-            find public/playlists -name '*.m3u' -exec sed -i 's/$/\r/' {} \;
-          fi
+          cp -r playlists/* public/playlists/ || echo "No playlists"
+          find public/playlists -name '*.m3u' -exec sed -i 's/$/\r/' {} \;
 
       - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@v3
