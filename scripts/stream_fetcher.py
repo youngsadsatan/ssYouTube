@@ -29,7 +29,7 @@ CHANNELS = {
         "@AssociatedPress",
         "@CNNbrasil",
         "@CRUXnews",
-        "@France24",  # Corrigido: removido _en que tinha DRM
+        "@France24_en",
         "@LiveNowFox",
         "@Reuters",
         "@SkyNews",
