@@ -1,20 +1,37 @@
 name: Playlist Updater
 on:
-  repository_dispatch:
-    types: [update_trigger]
+  workflow_dispatch:  # Permite acionamento manual
+  repository_dispatch: # Para acionamento via webhook externo
+    types: [run_update]
 
 jobs:
   update:
     runs-on: ubuntu-latest
     steps:
-      - name: Desativar User Agent Padrão
-        run: |
-          git config --global user.email "actions@noreply.github.com"
-          git config --global user.name "IPTV Updater"
-          echo "USER_AGENT='Custom-Agent/1.0 (Non-GitHub-Bot)'" >> $GITHUB_ENV
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Executar Atualização
-        env:
-          CRONJOB_WEBHOOK: ${{ secrets.CRONJOB_WEBHOOK }}
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
         run: |
-          python scripts/stream_fetcher.py --user-agent "$USER_AGENT"
+          pip install streamlink requests pillow beautifulsoup4
+          
+      - name: Run Updater Script
+        run: python scripts/stream_fetcher.py
+        env:
+          USER_AGENT: "IPTV-Updater/1.0 (GitHub Actions)"
+          
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./playlists
+          keep_files: true
+          user_name: 'IPTV Updater'
+          user_email: 'iptv-updater@noreply.github.com'
