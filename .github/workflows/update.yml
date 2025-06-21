@@ -24,17 +24,23 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y python3-dev
+          sudo apt-get install -y python3-dev libxml2-dev libxslt-dev
+          pip install --upgrade pip
           pip install streamlink==6.5.1 requests beautifulsoup4 Pillow
 
       - name: Run Stream Fetcher
         run: python scripts/stream_fetcher.py
         env:
-          USER_AGENT: "SSYouTube-Updater/1.0"
+          USER_AGENT: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
+
+      - name: Convert Line Endings to CRLF
+        run: |
+          if [ -d playlists ]; then
+            find playlists -name '*.m3u' -exec sed -i 's/$/\r/' {} \;
+          fi
 
       - name: Prepare Playlists Directory
         run: |
-          mkdir -p public
           mkdir -p public/playlists
           mkdir -p public/icons
           [ -d playlists ] && cp -r playlists/* public/playlists/ || echo "No playlists"
