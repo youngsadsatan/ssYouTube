@@ -6,7 +6,6 @@ import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
 from PIL import Image
-from urllib.parse import urlparse
 import json
 import time
 
@@ -31,6 +30,7 @@ CHANNELS = {
         "@CRUXnews",
         "@France24_en",
         "@LiveNowFox",
+        "@NBCNews",
         "@Reuters",
         "@SkyNews",
         "@WION"
@@ -58,79 +58,101 @@ CHANNELS = {
 }
 
 # ====================== FUNÇÕES AUXILIARES ATUALIZADAS ======================
-def get_live_url(channel_url):
-    """Obtém URL de live ativa a partir de um canal do YouTube"""
+def get_active_live(channel_id):
+    """Obtém URL de transmissão ao vivo ativa usando a API do YouTube"""
     try:
-        if not channel_url.endswith('/live'):
-            channel_url = channel_url.rstrip('/') + '/live'
-            
+        # URL da API de busca do YouTube
+        url = f"https://www.youtube.com/{channel_id}/live"
+        
         response = requests.get(
-            channel_url,
-            timeout=20,
-            headers={'User-Agent': USER_AGENT}
+            url,
+            headers={'User-Agent': USER_AGENT},
+            timeout=20
         )
         response.raise_for_status()
         
-        # Verifica redirecionamento direto
-        if "watch?v=" in response.url:
-            return response.url
-            
-        # Parse do HTML para encontrar link da live
+        # Extrai dados do JSON embutido
         soup = BeautifulSoup(response.text, 'html.parser')
+        script = soup.find('script', string=re.compile('var ytInitialData'))
         
-        # Tenta 1: Meta tag og:url
-        meta_url = soup.find('meta', property='og:url')
-        if meta_url and "watch?v=" in meta_url.get('content', ''):
-            return meta_url['content']
+        if not script:
+            print(f"   [ERRO] Script ytInitialData não encontrado para {channel_id}")
+            return None
+            
+        # Extrai o objeto JSON
+        json_str = script.string.split(' = ')[1].rstrip(';')
+        data = json.loads(json_str)
         
-        # Tenta 2: Link canonical
-        canonical = soup.find('link', rel='canonical')
-        if canonical and "watch?v=" in canonical.get('href', ''):
-            return canonical['href']
+        # Navega na estrutura para encontrar a transmissão ao vivo
+        contents = data.get('contents', {}) \
+                      .get('twoColumnBrowseResultsRenderer', {}) \
+                      .get('tabs', [{}])[0] \
+                      .get('tabRenderer', {}) \
+                      .get('content', {}) \
+                      .get('sectionListRenderer', {}) \
+                      .get('contents', [{}])[0] \
+                      .get('itemSectionRenderer', {}) \
+                      .get('contents', [{}])[0] \
+                      .get('channelFeaturedContentRenderer', {}) \
+                      .get('items', [])
         
-        # Tenta 3: JSON-LD
-        script = soup.find('script', type='application/ld+json')
-        if script:
-            try:
-                data = json.loads(script.string)
-                if isinstance(data, list):
-                    data = data[0]
-                if data.get('url') and "watch?v=" in data['url']:
-                    return data['url']
-            except:
-                pass
+        for item in contents:
+            video = item.get('videoRenderer', {})
+            if video.get('thumbnailOverlays') and any(
+                overlay.get('thumbnailOverlayTimeStatusRenderer', {}).get('style', '') == 'LIVE'
+                for overlay in video.get('thumbnailOverlays', [])
+            ):
+                video_id = video.get('videoId')
+                if video_id:
+                    return f"https://www.youtube.com/watch?v={video_id}"
         
         return None
     except Exception as e:
-        print(f"[ERRO] Falha ao obter live de {channel_url}: {str(e)}")
+        print(f"[ERRO] Falha ao obter live de {channel_id}: {str(e)}")
         return None
 
-def fetch_stream_with_ytdlp(youtube_url):
-    """Obtém URL de stream usando yt-dlp (formato m3u8)"""
+def extract_stream_url(youtube_url):
+    """Extrai URL de stream usando métodos alternativos"""
     try:
-        command = [
-            "yt-dlp",
-            "-g",
-            "--format", "best",
-            "--no-check-certificates",
-            youtube_url
-        ]
+        # Tentativa 1: yt-dlp
+        try:
+            result = subprocess.run(
+                ["yt-dlp", "-g", "--format", "best", youtube_url],
+                capture_output=True,
+                text=True,
+                timeout=30
+            )
+            if result.returncode == 0 and result.stdout.strip():
+                return result.stdout.strip()
+        except:
+            pass
         
-        result = subprocess.run(
-            command,
-            capture_output=True,
-            text=True,
-            timeout=60
+        # Tentativa 2: Extração direta via regex
+        response = requests.get(
+            youtube_url,
+            headers={'User-Agent': USER_AGENT},
+            timeout=20
         )
+        response.raise_for_status()
         
-        if result.returncode == 0:
-            # yt-dlp retorna a URL direta do stream
-            return result.stdout.strip()
-        else:
-            print(f"[ERRO] yt-dlp retornou erro: {result.stderr}")
-            return None
+        # Procura por URLs m3u8 no código fonte
+        m3u8_urls = re.findall(r'(https?://[^\s]+?\.m3u8(?:\?[^\s"]+)?)', response.text)
+        if m3u8_urls:
+            return m3u8_urls[0]
+        
+        # Tentativa 3: Player_response JSON
+        player_response = re.search(r'var ytInitialPlayerResponse\s*=\s*({.+?});', response.text)
+        if player_response:
+            player_data = json.loads(player_response.group(1))
+            streaming_data = player_data.get('streamingData', {})
+            formats = streaming_data.get('formats', []) + streaming_data.get('adaptiveFormats', [])
+            for fmt in formats:
+                if fmt.get('url'):
+                    return fmt['url']
+        
+        return None
     except Exception as e:
-        print(f"[ERRO] yt-dlp falhou para {youtube_url}: {str(e)}")
+        print(f"[ERRO] Falha ao extrair stream de {youtube_url}: {str(e)}")
         return None
 
 def download_icon(channel_id):
@@ -144,7 +166,7 @@ def download_icon(channel_id):
         if os.path.exists(icon_path):
             return icon_path
             
-        # URL alternativa para ícones de canal
+        # Tenta obter o ícone via API
         response = requests.get(
             f"https://www.youtube.com/{channel_id}",
             headers={'User-Agent': USER_AGENT},
@@ -158,7 +180,7 @@ def download_icon(channel_id):
             icon_url = icon_link['href']
         else:
             # Fallback para thumbnail padrão
-            icon_url = f"https://img.youtube.com/vi/{channel_id}/hqdefault.jpg"
+            icon_url = f"https://img.youtube.com/vi/{channel_id.split('@')[-1]}/hqdefault.jpg"
         
         # Baixa o ícone
         response = requests.get(
@@ -176,12 +198,9 @@ def download_icon(channel_id):
         # Processa a imagem
         img = Image.open(icon_path)
         img = img.convert("RGBA")
-        
-        # Redimensiona mantendo proporção
         img.thumbnail((128, 128))
-        
-        # Salva como PNG
         img.save(icon_path, "PNG")
+        
         return icon_path
     except Exception as e:
         print(f"[ERRO] Falha ao baixar ícone {channel_id}: {str(e)}")
@@ -202,18 +221,17 @@ def generate_playlists():
         
         for channel in sorted(channels):
             print(f" - Canal: {channel}")
-            channel_url = f"https://www.youtube.com/{channel}"
             
             # Obtém URL da live
-            live_url = get_live_url(channel_url)
+            live_url = get_active_live(channel)
             if not live_url:
                 print(f"   [AVISO] Nenhuma live ativa encontrada para {channel}")
                 continue
             
             print(f"   Live encontrada: {live_url}")
             
-            # Obtém stream URL com yt-dlp
-            stream_url = fetch_stream_with_ytdlp(live_url)
+            # Obtém stream URL
+            stream_url = extract_stream_url(live_url)
             if not stream_url:
                 print(f"   [AVISO] Nenhum stream encontrado para {channel}")
                 continue
@@ -232,6 +250,9 @@ def generate_playlists():
                 f"{stream_url}\r\n"
             )
             category_entries[category].append(entry)
+            
+            # Delay para evitar bloqueio
+            time.sleep(1)
     
     # Gera arquivos por categoria
     for category, entries in category_entries.items():
