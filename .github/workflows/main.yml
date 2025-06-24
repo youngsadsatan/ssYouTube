@@ -19,12 +19,9 @@ jobs:
       - name: Gerar playlist.m3u
         id: generate_playlist
         run: |
-          # Inicia o arquivo M3U
           echo "#EXTM3U" > playlist.m3u
-          echo "## Playlist gerada em: $(date)" >> playlist.m3u
+          echo "## Playlist atualizada em: $(date)" >> playlist.m3u
 
-          # Definição dos canais em formato JSON.
-          # Corrigido "StarDust Music" para "StarBurst Music" conforme a lista original.
           CHANNELS_JSON='
           [
             {"category": "Cams", "name": "CGTN Europe", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_kU5C22e2A5aGj_t29h1a_TBCk3_RYGEi5r2yGnoQ=s176-c-k-c0x00ffffff-no-rj", "handle": "@CGTNEurope"},
@@ -56,35 +53,36 @@ jobs:
             {"category": "Tornadoes", "name": "Ryan Hall, Yall", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_l-four-five-six-seven-eight-nine=s176-c-k-c0x00ffffff-no-rj", "handle": "@RyanHallYall"}
           ]
           '
-          
-          # Ordena o JSON por categoria e depois por nome usando jq, que é mais robusto.
-          # Itera sobre cada objeto JSON ordenado.
+
           echo "$CHANNELS_JSON" | jq -c '. | sort_by(.category, .name) | .[]' | while IFS= read -r line; do
             CATEGORY=$(echo "$line" | jq -r '.category')
             NAME=$(echo "$line" | jq -r '.name')
             LOGO=$(echo "$line" | jq -r '.logo')
             HANDLE=$(echo "$line" | jq -r '.handle')
-            
-            # CORREÇÃO: Constrói a URL do canal dinamicamente usando o handle.
             CHANNEL_URL="https://www.youtube.com/watch?v=ycpTZPLLRSk0"
 
+            echo "-----------------------------------------------------"
             echo "Verificando: $NAME ($HANDLE)"
             
-            # Tenta obter a URL M3U8 da live do canal. A adição de "/live" foca a busca.
-            # O comando '2>/dev/null' suprime mensagens de erro se o canal não estiver ao vivo.
-            M3U8_URL=$(yt-dlp -f best --get-url "$CHANNEL_URL/live" 2>/dev/null)
+            # **MUDANÇA CRÍTICA:**
+            # 1. Não ocultamos mais os erros (removido '2>/dev/null'). Agora, se um canal falhar, o log mostrará o porquê.
+            # 2. Adicionamos '|| true' para que, mesmo que o comando yt-dlp falhe, o script não pare e continue para o próximo canal.
+            # 3. Adicionamos 'grep' para garantir que estamos pegando apenas a URL do manifesto M3U8.
+            M3U8_URL=$( (yt-dlp -f best --get-url "$CHANNEL_URL/live" | grep 'm3u8' | head -n 1) || true )
             
             if [ -n "$M3U8_URL" ]; then
-              echo "  --> SUCESSO: Canal está ao vivo. Adicionando à playlist."
+              echo "  --> SUCESSO: Canal online. Adicionando à playlist."
               echo "" >> playlist.m3u
               echo "#EXTINF:-1 tvg-logo=\"$LOGO\" group-title=\"$CATEGORY\",$NAME" >> playlist.m3u
               echo "$M3U8_URL" >> playlist.m3u
             else
-              echo "  --> INFO: Canal não está ao vivo ou não foi encontrado. Pulando."
+              echo "  --> FALHA: Canal offline ou ocorreu um erro. Pulando."
             fi
           done
           
-          echo "Geração da playlist concluída."
+          echo "-----------------------------------------------------"
+          echo "Verificação de todos os canais concluída."
+          echo "Conteúdo final do arquivo playlist.m3u:"
           cat playlist.m3u
 
       - name: Fazer commit das alterações
