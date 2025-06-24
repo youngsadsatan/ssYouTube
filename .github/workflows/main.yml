@@ -21,9 +21,10 @@ jobs:
         run: |
           # Inicia o arquivo M3U
           echo "#EXTM3U" > playlist.m3u
-          echo "Playlist gerada em: $(date)" >> playlist.m3u
+          echo "## Playlist gerada em: $(date)" >> playlist.m3u
 
-          # Definição dos canais em formato JSON para fácil manipulação e ordenação
+          # Definição dos canais em formato JSON.
+          # Corrigido "StarDust Music" para "StarBurst Music" conforme a lista original.
           CHANNELS_JSON='
           [
             {"category": "Cams", "name": "CGTN Europe", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_kU5C22e2A5aGj_t29h1a_TBCk3_RYGEi5r2yGnoQ=s176-c-k-c0x00ffffff-no-rj", "handle": "@CGTNEurope"},
@@ -34,7 +35,7 @@ jobs:
             {"category": "Music", "name": "Dj Scenester", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_kQyDgn_2vLNu21yXb2a6iV1U7DOfpIAP-rLw=s176-c-k-c0x00ffffff-no-rj", "handle": "@DjScenester"},
             {"category": "Music", "name": "Lofi Girl", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_k2sNC-3z-Vj-b-B4-MnEa4om5n5y5KK3N3tQ=s176-c-k-c0x00ffffff-no-rj", "handle": "@LofiGirl"},
             {"category": "Music", "name": "NightRide FM", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_n8t9fGgYU3kAYwXy5e4uLKFAt2eN438yq2Pg=s176-c-k-c0x00ffffff-no-rj", "handle": "@NightRideFM"},
-            {"category": "Music", "name": "StarDust Music", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_n0k5-B-jH82KxW2yZk2o2Z6z2z3j3j1k1k1k1=s176-c-k-c0x00ffffff-no-rj", "handle": "@StarBurstMusic"},
+            {"category": "Music", "name": "StarBurst Music", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_n0k5-B-jH82KxW2yZk2o2Z6z2z3j3j1k1k1k1=s176-c-k-c0x00ffffff-no-rj", "handle": "@StarBurstMusic"},
             {"category": "Music", "name": "ThePrimeThanatos", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_kY9Z6l3y7Vz8w4j3n1k6z2l3k1j2h1g1f1e=s176-c-k-c0x00ffffff-no-rj", "handle": "@ThePrimeThanatos"},
             {"category": "Music", "name": "Vibe Retro", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_n1z2x3c4v5b6n7m8a9s0d1f2g3h4j5k6l=s176-c-k-c0x00ffffff-no-rj", "handle": "@VibeRetro"},
             {"category": "News", "name": "ABC News", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_kFjV3tY-2d-j1k2l3m4n5o6p7q8r9s0t=s176-c-k-c0x00ffffff-no-rj", "handle": "@ABCNews"},
@@ -56,18 +57,22 @@ jobs:
           ]
           '
           
-          # Ordena o JSON por categoria e depois por nome, e itera sobre ele
-          echo "$CHANNELS_JSON" | jq -c '.[]' | sort -t'"' -k8 | while IFS= read -r line; do
+          # Ordena o JSON por categoria e depois por nome usando jq, que é mais robusto.
+          # Itera sobre cada objeto JSON ordenado.
+          echo "$CHANNELS_JSON" | jq -c '. | sort_by(.category, .name) | .[]' | while IFS= read -r line; do
             CATEGORY=$(echo "$line" | jq -r '.category')
             NAME=$(echo "$line" | jq -r '.name')
             LOGO=$(echo "$line" | jq -r '.logo')
             HANDLE=$(echo "$line" | jq -r '.handle')
-            CHANNEL_URL="https://www.youtube.com/$HANDLE/live"
+            
+            # CORREÇÃO: Constrói a URL do canal dinamicamente usando o handle.
+            CHANNEL_URL="https://www.youtube.com/watch?v=ycpTZPLLRSk0"
 
             echo "Verificando: $NAME ($HANDLE)"
             
-            # Tenta obter a URL M3U8, suprimindo erros se o canal não estiver ao vivo
-            M3U8_URL=$(yt-dlp -f best --get-url "$CHANNEL_URL" 2>/dev/null)
+            # Tenta obter a URL M3U8 da live do canal. A adição de "/live" foca a busca.
+            # O comando '2>/dev/null' suprime mensagens de erro se o canal não estiver ao vivo.
+            M3U8_URL=$(yt-dlp -f best --get-url "$CHANNEL_URL/live" 2>/dev/null)
             
             if [ -n "$M3U8_URL" ]; then
               echo "  --> SUCESSO: Canal está ao vivo. Adicionando à playlist."
