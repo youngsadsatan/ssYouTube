@@ -6,6 +6,11 @@ on:
 jobs:
   build-playlist:
     runs-on: ubuntu-latest
+    
+    # ADICIONE ESTE BLOCO DE PERMISSÕES AQUI
+    permissions:
+      contents: write # Concede permissão para o workflow fazer 'git push'
+
     steps:
       - name: Checkout do código
         uses: actions/checkout@v4
@@ -64,10 +69,6 @@ jobs:
             echo "-----------------------------------------------------"
             echo "Verificando: $NAME ($HANDLE)"
             
-            # **MUDANÇA CRÍTICA:**
-            # 1. Não ocultamos mais os erros (removido '2>/dev/null'). Agora, se um canal falhar, o log mostrará o porquê.
-            # 2. Adicionamos '|| true' para que, mesmo que o comando yt-dlp falhe, o script não pare e continue para o próximo canal.
-            # 3. Adicionamos 'grep' para garantir que estamos pegando apenas a URL do manifesto M3U8.
             M3U8_URL=$( (yt-dlp -f best --get-url "$CHANNEL_URL/live" | grep 'm3u8' | head -n 1) || true )
             
             if [ -n "$M3U8_URL" ]; then
