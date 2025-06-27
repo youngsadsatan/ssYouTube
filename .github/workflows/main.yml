@@ -20,8 +20,6 @@ jobs:
           sudo apt-get update && sudo apt-get install -y jq
 
       - name: Criar arquivo de cookies a partir do Secret
-        # Este passo crucial cria um arquivo cookies.txt temporário usando o secret que você configurou no GitHub.
-        # A linha 'if:' foi removida para corrigir o erro de validação do workflow.
         run: echo "${{ secrets.YOUTUBE_COOKIES }}" > cookies.txt
 
       - name: Gerar playlist.m3u
@@ -67,11 +65,15 @@ jobs:
             NAME=$(echo "$line" | jq -r '.name')
             LOGO=$(echo "$line" | jq -r '.logo')
             HANDLE=$(echo "$line" | jq -r '.handle')
-            CHANNEL_URL="https://www.youtube.com/watch?v=ycpTZPLLRSk0"
+            
+            # **AQUI ESTÁ A CORREÇÃO CRÍTICA**
+            # A URL agora é construída dinamicamente usando a variável HANDLE.
+            CHANNEL_URL="https://www.youtube.com/watch?v=ycpTZPLLRSk9"
 
             echo "-----------------------------------------------------"
             echo "Verificando: $NAME ($HANDLE)"
-            
+            echo "--> URL do Canal: $CHANNEL_URL" # Adicionado para transparência
+
             M3U8_URL=$( (yt-dlp --cookies cookies.txt -f b --get-url "$CHANNEL_URL/live" | grep 'm3u8' | head -n 1) || true )
             
             if [ -n "$M3U8_URL" ]; then
