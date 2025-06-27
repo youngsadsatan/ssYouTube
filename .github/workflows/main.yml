@@ -20,10 +20,9 @@ jobs:
           sudo apt-get update && sudo apt-get install -y jq
 
       - name: Criar arquivo de cookies a partir do Secret
-        # Este passo crucial cria um arquivo cookies.txt temporário usando o secret que você configurou.
+        # Este passo crucial cria um arquivo cookies.txt temporário usando o secret que você configurou no GitHub.
+        # A linha 'if:' foi removida para corrigir o erro de validação do workflow.
         run: echo "${{ secrets.YOUTUBE_COOKIES }}" > cookies.txt
-        # O 'if' garante que o passo não falhe se o secret estiver vazio, embora ele seja necessário.
-        if: ${{ secrets.YOUTUBE_COOKIES != '' }}
 
       - name: Gerar playlist.m3u
         id: generate_playlist
@@ -37,13 +36,13 @@ jobs:
             {"category": "Cams", "name": "DD Cyprus 1-Click", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_n44KxM3fFp-IC45i_YLz-V4sBq5uI3pYl5eA=s176-c-k-c0x00ffffff-no-rj", "handle": "@DDCyprus1Click"},
             {"category": "Cams", "name": "Intel Cams Live", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_nS7yPOwQk2kCqC7aB3vTpsEhg2k0Sj9G1W-g=s176-c-k-c0x00ffffff-no-rj", "handle": "@intelcamslive"},
             {"category": "Cams", "name": "Source Global", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_mC4g9A-eLRO4wdQe3u3wAFWd2oFmwwd3yHKA=s176-c-k-c0x00ffffff-no-rj", "handle": "@SourceGlobal"},
-            {"category": "Synthwave", "name": "80s Neon Wave", "logo": "https://yt3.googleusercontent.com/YdCHUSny2nxiQSo3Wn2NH6g_eYk2u6s4rrg05J2nB-wJb_u32Nvj5pCgO62oYqvo3K4xxoG2=s176-c-k-c0x00ffffff-no-rj", "handle": "@80sNeonWave"},
-            {"category": "Synthwave", "name": "Dj Scenester", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_kQyDgn_2vLNu21yXb2a6iV1U7DOfpIAP-rLw=s176-c-k-c0x00ffffff-no-rj", "handle": "@DjScenester"},
-            {"category": "Synthwave", "name": "Lofi Girl", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_k2sNC-3z-Vj-b-B4-MnEa4om5n5y5KK3N3tQ=s176-c-k-c0x00ffffff-no-rj", "handle": "@LofiGirl"},
-            {"category": "Synthwave", "name": "NightRide FM", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_n8t9fGgYU3kAYwXy5e4uLKFAt2eN438yq2Pg=s176-c-k-c0x00ffffff-no-rj", "handle": "@NightRideFM"},
-            {"category": "Synthwave", "name": "StarBurst Music", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_n0k5-B-jH82KxW2yZk2o2Z6z2z3j3j1k1k1k1=s176-c-k-c0x00ffffff-no-rj", "handle": "@StarBurstMusic"},
-            {"category": "Synthwave", "name": "ThePrimeThanatos", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_kY9Z6l3y7Vz8w4j3n1k6z2l3k1j2h1g1f1e=s176-c-k-c0x00ffffff-no-rj", "handle": "@ThePrimeThanatos"},
-            {"category": "Synthwave", "name": "Vibe Retro", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_n1z2x3c4v5b6n7m8a9s0d1f2g3h4j5k6l=s176-c-k-c0x00ffffff-no-rj", "handle": "@VibeRetro"},
+            {"category": "Music", "name": "80s Neon Wave", "logo": "https://yt3.googleusercontent.com/YdCHUSny2nxiQSo3Wn2NH6g_eYk2u6s4rrg05J2nB-wJb_u32Nvj5pCgO62oYqvo3K4xxoG2=s176-c-k-c0x00ffffff-no-rj", "handle": "@80sNeonWave"},
+            {"category": "Music", "name": "Dj Scenester", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_kQyDgn_2vLNu21yXb2a6iV1U7DOfpIAP-rLw=s176-c-k-c0x00ffffff-no-rj", "handle": "@DjScenester"},
+            {"category": "Music", "name": "Lofi Girl", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_k2sNC-3z-Vj-b-B4-MnEa4om5n5y5KK3N3tQ=s176-c-k-c0x00ffffff-no-rj", "handle": "@LofiGirl"},
+            {"category": "Music", "name": "NightRide FM", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_n8t9fGgYU3kAYwXy5e4uLKFAt2eN438yq2Pg=s176-c-k-c0x00ffffff-no-rj", "handle": "@NightRideFM"},
+            {"category": "Music", "name": "StarBurst Music", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_n0k5-B-jH82KxW2yZk2o2Z6z2z3j3j1k1k1k1=s176-c-k-c0x00ffffff-no-rj", "handle": "@StarBurstMusic"},
+            {"category": "Music", "name": "ThePrimeThanatos", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_kY9Z6l3y7Vz8w4j3n1k6z2l3k1j2h1g1f1e=s176-c-k-c0x00ffffff-no-rj", "handle": "@ThePrimeThanatos"},
+            {"category": "Music", "name": "Vibe Retro", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_n1z2x3c4v5b6n7m8a9s0d1f2g3h4j5k6l=s176-c-k-c0x00ffffff-no-rj", "handle": "@VibeRetro"},
             {"category": "News", "name": "ABC News", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_kFjV3tY-2d-j1k2l3m4n5o6p7q8r9s0t=s176-c-k-c0x00ffffff-no-rj", "handle": "@ABCNews"},
             {"category": "News", "name": "Al Jazeera Arabic", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_k-1a2b3c4d5e6f7g8h9i0j=s176-c-k-c0x00ffffff-no-rj", "handle": "@AlJazeera"},
             {"category": "News", "name": "Al Jazeera English", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_k_9z8y7x6w5v4u3t2s1r=s176-c-k-c0x00ffffff-no-rj", "handle": "@AlJazeeraEnglish"},
@@ -73,9 +72,6 @@ jobs:
             echo "-----------------------------------------------------"
             echo "Verificando: $NAME ($HANDLE)"
             
-            # **MUDANÇA CRÍTICA:**
-            # 1. Adicionado --cookies cookies.txt para usar o arquivo com a sua sessão.
-            # 2. Alterado -f best para -f b para silenciar o aviso do yt-dlp.
             M3U8_URL=$( (yt-dlp --cookies cookies.txt -f b --get-url "$CHANNEL_URL/live" | grep 'm3u8' | head -n 1) || true )
             
             if [ -n "$M3U8_URL" ]; then
