@@ -28,35 +28,36 @@ jobs:
           echo "#EXTM3U" > playlist.m3u
           echo "## Playlist atualizada em: $(date)" >> playlist.m3u
 
+          # ESTRUTURA DE DADOS CORRIGIDA: Usando 'live_url' em vez de 'handle'
           CHANNELS_JSON='
           [
-            {"category": "Cams", "name": "CGTN Europe", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_kU5C22e2A5aGj_t29h1a_TBCk3_RYGEi5r2yGnoQ=s176-c-k-c0x00ffffff-no-rj", "handle": "@CGTNEurope"},
-            {"category": "Cams", "name": "DD Cyprus 1-Click", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_n44KxM3fFp-IC45i_YLz-V4sBq5uI3pYl5eA=s176-c-k-c0x00ffffff-no-rj", "handle": "@DDCyprus1Click"},
-            {"category": "Cams", "name": "Intel Cams Live", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_nS7yPOwQk2kCqC7aB3vTpsEhg2k0Sj9G1W-g=s176-c-k-c0x00ffffff-no-rj", "handle": "@intelcamslive"},
-            {"category": "Cams", "name": "Source Global", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_mC4g9A-eLRO4wdQe3u3wAFWd2oFmwwd3yHKA=s176-c-k-c0x00ffffff-no-rj", "handle": "@SourceGlobal"},
-            {"category": "Music", "name": "80s Neon Wave", "logo": "https://yt3.googleusercontent.com/YdCHUSny2nxiQSo3Wn2NH6g_eYk2u6s4rrg05J2nB-wJb_u32Nvj5pCgO62oYqvo3K4xxoG2=s176-c-k-c0x00ffffff-no-rj", "handle": "@80sNeonWave"},
-            {"category": "Music", "name": "Dj Scenester", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_kQyDgn_2vLNu21yXb2a6iV1U7DOfpIAP-rLw=s176-c-k-c0x00ffffff-no-rj", "handle": "@DjScenester"},
-            {"category": "Music", "name": "Lofi Girl", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_k2sNC-3z-Vj-b-B4-MnEa4om5n5y5KK3N3tQ=s176-c-k-c0x00ffffff-no-rj", "handle": "@LofiGirl"},
-            {"category": "Music", "name": "NightRide FM", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_n8t9fGgYU3kAYwXy5e4uLKFAt2eN438yq2Pg=s176-c-k-c0x00ffffff-no-rj", "handle": "@NightRideFM"},
-            {"category": "Music", "name": "StarBurst Music", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_n0k5-B-jH82KxW2yZk2o2Z6z2z3j3j1k1k1k1=s176-c-k-c0x00ffffff-no-rj", "handle": "@StarBurstMusic"},
-            {"category": "Music", "name": "ThePrimeThanatos", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_kY9Z6l3y7Vz8w4j3n1k6z2l3k1j2h1g1f1e=s176-c-k-c0x00ffffff-no-rj", "handle": "@ThePrimeThanatos"},
-            {"category": "Music", "name": "Vibe Retro", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_n1z2x3c4v5b6n7m8a9s0d1f2g3h4j5k6l=s176-c-k-c0x00ffffff-no-rj", "handle": "@VibeRetro"},
-            {"category": "News", "name": "ABC News", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_kFjV3tY-2d-j1k2l3m4n5o6p7q8r9s0t=s176-c-k-c0x00ffffff-no-rj", "handle": "@ABCNews"},
-            {"category": "News", "name": "Al Jazeera Arabic", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_k-1a2b3c4d5e6f7g8h9i0j=s176-c-k-c0x00ffffff-no-rj", "handle": "@AlJazeera"},
-            {"category": "News", "name": "Al Jazeera English", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_k_9z8y7x6w5v4u3t2s1r=s176-c-k-c0x00ffffff-no-rj", "handle": "@AlJazeeraEnglish"},
-            {"category": "News", "name": "Associated Press", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_l-z-y-x-w-v-u-t-s-r-q=s176-c-k-c0x00ffffff-no-rj", "handle": "@AssociatedPress"},
-            {"category": "News", "name": "CNN Brasil", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_k-a-b-c-d-e-f-g-h-i-j=s176-c-k-c0x00ffffff-no-rj", "handle": "@CNNbrasil"},
-            {"category": "News", "name": "CRUX", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_l-1-2-3-4-5-6-7-8-9=s176-c-k-c0x00ffffff-no-rj", "handle": "@CRUXnews"},
-            {"category": "News", "name": "FRANCE 24 English", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_k-q-w-e-r-t-y-u-i-o-p=s176-c-k-c0x00ffffff-no-rj", "handle": "@France24_en"},
-            {"category": "News", "name": "LiveNOW from FOX", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_l-p-o-i-u-y-t-r-e-w-q=s176-c-k-c0x00ffffff-no-rj", "handle": "@LiveNOWfromFOX"},
-            {"category": "News", "name": "NBC News", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_k-m-n-b-v-c-x-z-l-k-j=s176-c-k-c0x00ffffff-no-rj", "handle": "@NBCNews"},
-            {"category": "News", "name": "Reuters", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_l-j-k-l-z-x-c-v-b-n-m=s176-c-k-c0x00ffffff-no-rj", "handle": "@Reuters"},
-            {"category": "News", "name": "Sky News", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_k-a-s-d-f-g-h-j-k-l-semicolon=s176-c-k-c0x00ffffff-no-rj", "handle": "@SkyNews"},
-            {"category": "News", "name": "WION", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_l-g-h-j-k-l-s-e-m-i-c-o-l-o-n=s176-c-k-c0x00ffffff-no-rj", "handle": "@WION"},
-            {"category": "Rap", "name": "Rap Mafia", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_k-x-c-v-b-n-m-comma-period-slash=s176-c-k-c0x00ffffff-no-rj", "handle": "@RapMafia"},
-            {"category": "Tornadoes", "name": "Max Velocity", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_l-one-two-three-four-five-six-seven=s176-c-k-c0x00ffffff-no-rj", "handle": "@MaxVelocityWX"},
-            {"category": "Tornadoes", "name": "Reed Timmer", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_k-eight-nine-zero-one-two-three=s176-c-k-c0x00ffffff-no-rj", "handle": "@ReedTimmerWx"},
-            {"category": "Tornadoes", "name": "Ryan Hall, Yall", "logo": "https://yt3.googleusercontent.com/ytc/AIdro_l-four-five-six-seven-eight-nine=s176-c-k-c0x00ffffff-no-rj", "handle": "@RyanHallYall"}
+            {"category": "Cams", "name": "CGTN Europe", "logo": "", "live_url": "https://youtube.com/@CGTNEurope/live"},
+            {"category": "Cams", "name": "DD Cyprus 1 Click", "logo": "", "live_url": "https://youtube.com/@DDCyprus1Click/live"},
+            {"category": "Cams", "name": "Intel Cams Live", "logo": "", "live_url": "https://youtube.com/@intelcamslive/live"},
+            {"category": "Cams", "name": "Source Global", "logo": "", "live_url": "https://youtube.com/@SourceGlobal/live"},
+            {"category": "Music", "name": "80s Neon Wave", "logo": "", "live_url": "https://youtube.com/@80sNeonWave/live"},
+            {"category": "Music", "name": "Dj Scenester", "logo": "", "live_url": "https://youtube.com/@DjScenester/live"},
+            {"category": "Music", "name": "Lofi Girl", "logo": "", "live_url": "https://www.youtube.com/LofiGirl/live"},
+            {"category": "Music", "name": "NightRide FM", "logo": "", "live_url": "https://www.youtube.com/NightrideFM/live"},
+            {"category": "Music", "name": "StarBurst Music", "logo": "", "live_url": "https://youtube.com/@starburstmusic/live"},
+            {"category": "Music", "name": "ThePrimeThanatos", "logo": "", "live_url": "https://youtube.com/@ThePrimeThanatos/live"},
+            {"category": "Music", "name": "Vibe Retro", "logo": "", "live_url": "https://youtube.com/viberetro/live"},
+            {"category": "News", "name": "ABC News", "logo": "", "live_url": "https://www.youtube.com/ABCNews/live"},
+            {"category": "News", "name": "Al Jazeera Arabic", "logo": "", "live_url": "https://www.youtube.com/aljazeera/live"},
+            {"category": "News", "name": "Al Jazeera English", "logo": "", "live_url": "https://www.youtube.com/aljazeeraenglish/live"},
+            {"category": "News", "name": "Associated Press", "logo": "", "live_url": "https://youtube.com/@AssociatedPress/live"},
+            {"category": "News", "name": "CNN Brasil", "logo": "", "live_url": "https://www.youtube.com/CNNbrasil/live"},
+            {"category": "News", "name": "CRUX", "logo": "", "live_url": "https://www.youtube.com/CRUXnews/live"},
+            {"category": "News", "name": "FRANCE 24 English", "logo": "", "live_url": "https://www.youtube.com/France24_en/live"},
+            {"category": "News", "name": "LiveNOW from FOX", "logo": "", "live_url": "https://www.youtube.com/livenowfox/live"},
+            {"category": "News", "name": "NBC News", "logo": "", "live_url": "https://www.youtube.com/NBCNews/live"},
+            {"category": "News", "name": "Reuters", "logo": "", "live_url": "https://www.youtube.com/Reuters/live"},
+            {"category": "News", "name": "Sky News", "logo": "", "live_url": "https://www.youtube.com/SkyNews/live"},
+            {"category": "News", "name": "WION", "logo": "", "live_url": "https://www.youtube.com/WION/live"},
+            {"category": "Rap", "name": "Rap Mafia", "logo": "", "live_url": "https://www.youtube.com/RapMafia/live"},
+            {"category": "Tornadoes", "name": "Max Velocity", "logo": "", "live_url": "https://www.youtube.com/MaxVelocityWX/live"},
+            {"category": "Tornadoes", "name": "Reed Timmer", "logo": "", "live_url": "https://www.youtube.com/ReedTimmerWx/live"},
+            {"category": "Tornadoes", "name": "Ryan Hall Yall", "logo": "", "live_url": "https://www.youtube.com/RyanHallYall/live"}
           ]
           '
 
@@ -64,20 +65,15 @@ jobs:
             CATEGORY=$(echo "$line" | jq -r '.category')
             NAME=$(echo "$line" | jq -r '.name')
             LOGO=$(echo "$line" | jq -r '.logo')
-            HANDLE=$(echo "$line" | jq -r '.handle')
-            
-            # ===== A CORREÇÃO FUNDAMENTAL ESTÁ AQUI =====
-            # A URL é construída usando a variável $HANDLE, que muda a cada iteração do loop.
-            # As aspas duplas são essenciais para que o shell substitua $HANDLE pelo seu valor.
-            CHANNEL_URL="http://www.youtube.com/watch2"
+            # LÓGICA CORRIGIDA: Pega a URL da live diretamente.
+            LIVE_URL=$(echo "$line" | jq -r '.live_url')
 
-            echo "-----------------------------------------------------"
-            echo "Verificando: $NAME ($HANDLE)"
-            echo "--> URL do Canal: $CHANNEL_URL"
+            echo "Loading..."
+            echo "Verificando: $NAME"
+            echo "--> URL da Live: $LIVE_URL"
 
-            # O comando yt-dlp agora usará a URL correta e específica para cada canal.
-            # O timeout de 30 segundos evita que o script fique preso em um canal que não responde.
-            M3U8_URL=$( (timeout 30 yt-dlp --cookies cookies.txt -f b --get-url "$CHANNEL_URL/live" | grep 'm3u8' | head -n 1) || true )
+            # Comando usa a URL direta da live, que é muito mais confiável.
+            M3U8_URL=$( (timeout 30 yt-dlp --cookies cookies.txt -f b --get-url "$LIVE_URL" | grep 'm3u8' | head -n 1) || true )
             
             if [ -n "$M3U8_URL" ]; then
               echo "  --> SUCESSO: Canal online. URL M3U8 encontrada."
@@ -85,12 +81,11 @@ jobs:
               echo "#EXTINF:-1 tvg-logo=\"$LOGO\" group-title=\"$CATEGORY\",$NAME" >> playlist.m3u
               echo "$M3U8_URL" >> playlist.m3u
             else
-              # Esta mensagem agora reflete a realidade: o canal pode estar offline ou a live não foi encontrada naquela URL.
-              echo "  --> FALHA: A live do canal não foi encontrada. Pode estar offline."
+              echo "  --> FALHA: Live não encontrada nesta URL específica. Pode estar offline."
             fi
           done
           
-          echo "-----------------------------------------------------"
+          echo "..."
           echo "Verificação de todos os canais concluída."
 
       - name: Fazer commit das alterações
@@ -98,7 +93,6 @@ jobs:
           git config user.name "${{ github.actor }}"
           git config user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
           git add playlist.m3u
-          # Verifica se o arquivo playlist.m3u tem mais do que as 2 linhas de cabeçalho.
           if [ $(wc -l < playlist.m3u) -gt 2 ]; then
             git commit -m "Atualiza a playlist de lives do YouTube"
             git push
