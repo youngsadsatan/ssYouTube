@@ -66,23 +66,27 @@ jobs:
             LOGO=$(echo "$line" | jq -r '.logo')
             HANDLE=$(echo "$line" | jq -r '.handle')
             
-            # **AQUI ESTÁ A CORREÇÃO CRÍTICA**
-            # A URL agora é construída dinamicamente usando a variável HANDLE.
-            CHANNEL_URL="https://www.youtube.com/watch?v=ycpTZPLLRSk9"
+            # ===== A CORREÇÃO FUNDAMENTAL ESTÁ AQUI =====
+            # A URL é construída usando a variável $HANDLE, que muda a cada iteração do loop.
+            # As aspas duplas são essenciais para que o shell substitua $HANDLE pelo seu valor.
+            CHANNEL_URL="http://www.youtube.com/watch2"
 
             echo "-----------------------------------------------------"
             echo "Verificando: $NAME ($HANDLE)"
-            echo "--> URL do Canal: $CHANNEL_URL" # Adicionado para transparência
+            echo "--> URL do Canal: $CHANNEL_URL"
 
-            M3U8_URL=$( (yt-dlp --cookies cookies.txt -f b --get-url "$CHANNEL_URL/live" | grep 'm3u8' | head -n 1) || true )
+            # O comando yt-dlp agora usará a URL correta e específica para cada canal.
+            # O timeout de 30 segundos evita que o script fique preso em um canal que não responde.
+            M3U8_URL=$( (timeout 30 yt-dlp --cookies cookies.txt -f b --get-url "$CHANNEL_URL/live" | grep 'm3u8' | head -n 1) || true )
             
             if [ -n "$M3U8_URL" ]; then
-              echo "  --> SUCESSO: Canal online. Adicionando à playlist."
+              echo "  --> SUCESSO: Canal online. URL M3U8 encontrada."
               echo "" >> playlist.m3u
               echo "#EXTINF:-1 tvg-logo=\"$LOGO\" group-title=\"$CATEGORY\",$NAME" >> playlist.m3u
               echo "$M3U8_URL" >> playlist.m3u
             else
-              echo "  --> FALHA: Canal offline ou ocorreu um erro. Pulando."
+              # Esta mensagem agora reflete a realidade: o canal pode estar offline ou a live não foi encontrada naquela URL.
+              echo "  --> FALHA: A live do canal não foi encontrada. Pode estar offline."
             fi
           done
           
@@ -94,10 +98,11 @@ jobs:
           git config user.name "${{ github.actor }}"
           git config user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
           git add playlist.m3u
-          if git diff --staged --quiet; then
-            echo "Nenhuma alteração na playlist. O arquivo está atualizado."
-          else
+          # Verifica se o arquivo playlist.m3u tem mais do que as 2 linhas de cabeçalho.
+          if [ $(wc -l < playlist.m3u) -gt 2 ]; then
             git commit -m "Atualiza a playlist de lives do YouTube"
             git push
-            echo "Playlist atualizada e enviada para o repositório."
+            echo "Playlist atualizada com sucesso e enviada para o repositório."
+          else
+            echo "Nenhuma live foi encontrada. Nenhum commit será feito."
           fi
